@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" charset="utf-8">
+    function renderSearchFilters(element_id) {
+        var filter = $('#' + element_id + '').val();
+        $.ajax({
+            url: "{% url 'get_search_filter_ajax' '' %}" + filter
+        })
+        .done(function(data) {
+            $('#' + element_id + '_filter').html(data);
+            $('.datePicker').datepicker();
+        });
+    }
+
+    function getFilters(d) {
+        d.fieldOne = $('#award_filter_one').val();
+        fieldName = d.fieldOne.split('|')[1];
+        d.fieldOneValue = $('#award_filter_one_filter #id_' + fieldName).val();
+        if (d.fieldOneValue === undefined )
+        {
+            d.fieldOneValue = $('#award_filter_one_filter #id_' + fieldName + '_start').val();
+            d.fieldOneEndDate = $('#award_filter_one_filter #id_' + fieldName + '_end').val();
+        }
+
+        d.conditionOne = $('[name="combinationOne"]:checked').val();
+        d.fieldTwo = $('#award_filter_two').val();
+        fieldName = d.fieldTwo.split('|')[1];
+        d.fieldTwoValue = $('#award_filter_two_filter #id_' + fieldName).val();
+        if (d.fieldTwoValue === undefined )
+        {
+            d.fieldTwoValue = $('#award_filter_two_filter #id_' + fieldName + '_start').val();
+            d.fieldTwoEndDate = $('#award_filter_two_filter #id_' + fieldName + '_end').val();
+        }
+
+        d.conditionTwo = $('[name="combinationTwo"]:checked').val();
+        d.fieldThree = $('#award_filter_three').val();
+        fieldName = d.fieldThree.split('|')[1];
+        d.fieldThreeValue = $('#award_filter_three_filter #id_' + fieldName).val();
+        if (d.fieldThreeValue === undefined )
+        {
+            d.fieldThreeValue = $('#award_filter_three_filter #id_' + fieldName + '_start').val();
+            d.fieldThreeEndDate = $('#award_filter_three_filter #id_' + fieldName + '_end').val();
+        }
+    }
+
+    $(document).ready(function() {
+        var awardTable = $("#awardTable").dataTable({
+            "ajax": {
+                "url": "{% url 'get_search_awards_ajax' %}",
+                "data": function (d) {
+                    getFilters(d);
+                 }
+            },
+            "deferRender": true
+        });
+        var awardTableTools = new $.fn.dataTable.TableTools(awardTable, {
+                "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+        });
+        $(awardTableTools.fnContainer()).insertAfter('div#awardTable_wrapper');
+
+        var subawardTable = $("#subawardTable").dataTable({
+            "ajax": {
+                "url": "{% url 'get_search_subawards_ajax' %}",
+                "data": function (d) {
+                    getFilters(d);
+                 }
+            },
+            "deferRender": true
+        });
+        var subawardTableTools = new $.fn.dataTable.TableTools(subawardTable, {
+                "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+        });
+        $(subawardTableTools.fnContainer()).insertAfter('div#subawardTable_wrapper');
+
+        var ptaTable = $("#ptaTable").dataTable({
+            "ajax": {
+                "url": "{% url 'get_search_pta_numbers_ajax' %}",
+                "data": function (d) {
+                    getFilters(d);
+                 }
+            },
+            "deferRender": true
+        });
+        var ptaTableTools = new $.fn.dataTable.TableTools(ptaTable, {
+                "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+        });
+        $(ptaTableTools.fnContainer()).insertAfter('div#ptaTable_wrapper');
+
+        $(".awardFilter").change(function(e) {
+            renderSearchFilters(e.target.id);
+        });
+
+        $("#apply_filters").click(function () {
+            $('#awardTable').DataTable().ajax.reload();
+            $('#subawardTable').DataTable().ajax.reload();
+            $('#ptaTable').DataTable().ajax.reload();
+        })
+
+        $('#awardTable').on('search.dt', function() {
+            var searchTerm = $('#awardTable').DataTable().search();
+
+            $('#subawardTable').DataTable().search(searchTerm).draw();
+            $('#ptaTable').DataTable().search(searchTerm).draw();
+        });
+
+        $('#subawardTable_filter').hide();
+        $('#ptaTable_filter').hide();
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Filters</h2>
+{% include 'awards/_filter_row.html' with selectId='award_filter_one' className='awardFilter' %}
+
+<div class="row" style="padding-top:10px;padding-bottom:10px;">
+    <input type="radio" name="combinationOne" value="and" checked>And
+    <input type="radio" name="combinationOne" value="or">Or
+</div>
+
+{% include 'awards/_filter_row.html' with selectId='award_filter_two' className='awardFilter' %}
+
+<div class="row" style="padding-top:10px;padding-bottom:10px;">
+    <input type="radio" name="combinationTwo" value="and" checked>And
+    <input type="radio" name="combinationTwo" value="or">Or
+</div>
+
+{% include 'awards/_filter_row.html' with selectId='award_filter_three' className='awardFilter' %}
+
+<div class="row" style="padding-top:10px;">
+    <a id="apply_filters" class="btn btn-sm btn-primary">Apply Filters</a>
+</div>
+
+<div class="row">
+    <h2>Full award search</h2>
+        <table id="awardTable" class="table table-striped table-bordered">
+            <thead>
+                <th></th>
+                <th>ATP ID</th>
+                <th>Status</th>
+                <th>Award Intake User</th>
+                <th>Award Negotiation User</th>
+                <th>Award Setup User</th>
+                <th>Subaward User</th>
+                <th>Award Management User</th>
+                <th>Award Closeout User</th>
+                {% for section in sections %}
+                    {% for field, value, boolean, field_name in section.get_search_fields %}
+                        <th>{{ field|capfirst }}</th>
+                    {% endfor %}
+                {% endfor %}
+            </thead>
+        </table>
+</div>
+
+<div class="row">
+    <h2>PTA search</h2>
+        <table id="ptaTable" class="table table-striped table-bordered">
+            <thead>
+                <th></th>
+                <th>ATP ID</th>
+                {% for field, value, boolean in blank_pta_number.get_search_fields %}
+                    <th>{{ field|capfirst }}</th>
+                {% endfor %}
+            </thead>
+        </table>
+</div>
+
+<div class="row">
+    <h2>Subawards search</h2>
+        <table id="subawardTable" class="table table-striped table-bordered">
+            <thead>
+                <th></th>
+                <th>ATP ID</th>
+                {% for field, value, boolean in blank_subaward.get_search_fields %}
+                    <th>{{ field|capfirst }}</th>
+                {% endfor %}
+            </thead>
+        </table>
+</div>
+
+{% endblock %}

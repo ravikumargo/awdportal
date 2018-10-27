@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Proposal Statistics Report</h2>
+
+<p>Specify a date range of submission dates.</p> 
+
+{% crispy form %}
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function() {
+        $(".datePicker").datepicker();
+    });
+</script>
+{% endblock %}

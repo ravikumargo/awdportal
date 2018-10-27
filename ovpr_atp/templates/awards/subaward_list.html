@@ -1,0 +1,45 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block subawards %}
+
+{% if section == 'Subaward' %}
+<form id="section-form" class="form-horizontal" method="post" >
+    {% if form.non_field_errors %}
+    <div class="alert alert-block alert-danger">
+        <h4 class="alert-heading">Errors</h4>
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+{% endif %}
+
+    {% for subaward in award.subaward_set.all %}
+        <ul class="list-inline">
+            <li>
+                <h4>{{ subaward }}</h4>
+                {% include 'awards/_most_recent_revision.html' with latest_revision=subaward.get_most_recent_revision is_edited=subaward.is_edited %}
+            </li>
+            {% if section == 'Subaward' %}
+                <li class="pull-right"><a href="{% url 'delete_subaward' award_pk=award.id subaward_pk=subaward.id %}" class="btn btn-sm btn-danger">Delete {{ subaward }}</a></li>
+                <li class="pull-right"><a href="{% url 'edit_subaward' award_pk=award.id subaward_pk=subaward.id %}" class="btn btn-sm btn-default">Edit {{ subaward }}</a></li>
+            {% endif %}
+        </ul>
+        {% include 'awards/_section_detail.html' with instance=subaward %}
+
+        {% if not forloop.last %}
+            <hr />
+        {% endif %}
+    {% empty %}
+        <p>There are no subawards associated with this award.</p>
+    {% endfor %}
+
+{% if section == 'Subaward' %}
+    <input id="id_move_to_next_step" name="move_to_next_step" type="hidden" value="True" /> 
+    <a href="{% url 'add_subaward' award_pk=award.id %}" class="btn btn-info pull-left">Add Subaward</a>
+    <div class="form-actions">
+        <button  type="button" id="submit-and-send" class="btn btn btn-success pull-right submit-and-send">Send award to next step</button>
+    </div>
+</form>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,38 @@
+{% load awards_extras %}
+
+<div class="row">
+    <div style='float:left;padding-right:10px;'>
+        <select id="{{selectId}}" class={{className}}>
+            <option value=""></option>
+
+            <optgroup label="Award">
+                <option value="Award|status">Status</option>
+                <option value="Award|award_acceptance_user">Award Intake User</option>
+                <option value="Award|award_negotiation_user">Award Negotiation User</option>
+                <option value="Award|award_setup_user">Award Setup User</option>
+                <option value="Award|subaward_user">Subaward User</option>
+                <option value="Award|award_management_user">Award Management User</option>
+                <option value="Award|award_closeout_user">Award Closeout User</option>
+                {% for section in sections %}
+                    {% for field, value, boolean, field_name in section.get_search_fields %}
+                        <option value="{{section|classname}}|{{field_name}}">{{ field|capfirst }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </optgroup>
+
+            <optgroup label="PTA">
+                {% for field, value, boolean, field_name in blank_pta_number.get_search_fields %}
+                    <option value="PTANumber|{{field_name}}">{{ field|capfirst }}</option>
+                {% endfor %}
+            </optgroup>
+
+            <optgroup label="Subaward">
+                {% for field, value, boolean, field_name in blank_subaward.get_search_fields %}
+                    <option value="Subaward|{{field_name}}">{{ field|capfirst }}</option>
+                {% endfor %}
+            </optgroup>
+        </select>
+    </div>
+    <div id="{{selectId}}_filter" style="float:left; padding-left:10px">
+    </div>
+</div>

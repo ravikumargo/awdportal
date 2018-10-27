@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block js %}
+<script type="text/javascript" charset="utf-8">
+    function generateProposalIntakeUrl(baseUrl) {
+        var url = baseUrl;
+        var scroll = $(window).scrollTop();
+
+        if (url.indexOf("?") < 0) {
+            url += '?';
+        } else {
+            url += '&';
+        }
+        url += 'scroll=' + scroll;
+
+        window.location.href = url;
+    }
+
+    $.extend( $.fn.dataTableExt.oSort, {
+        "nulldate-asc": function (a, b) {
+            if (a === b) return 0;
+            if (a == '') return 1;
+            if (b == '') return -1;
+            if (Date.parse(a) > Date.parse(b))
+                return 1;
+            else
+                return -1;
+        },
+        "nulldate-desc": function (b, a) {
+            if (a === b) return 0;
+            if (a == '') return -1;
+            if (b == '') return 1;
+            if (Date.parse(a) > Date.parse(b))
+                return 1;
+            else
+                return -1;
+        }
+    } );
+
+    $(document).ready(function() {
+        var awardTable = $("#awardTable").dataTable({
+            "ajax": "{% url 'get_awards_ajax' %}",
+            "deferRender": true
+        });
+        var awardTableTools = new $.fn.dataTable.TableTools(awardTable, {
+                "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+            });      
+        $(awardTableTools.fnContainer()).insertAfter('div#awardTable_wrapper');
+
+        var proposalTable = $("#proposalIntakeTable").dataTable({
+            "order": [[ 7, "asc" ]],
+            "columnDefs": [
+                { "type": "natural", "targets": 0 },
+                { "type": "nulldate", "orderData": [7, 0], "targets": 7 }
+            ]
+        });
+        var proposalTableTools = new $.fn.dataTable.TableTools(proposalTable, {
+                "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+            });      
+        $(proposalTableTools.fnContainer()).insertAfter('div#proposalIntakeTable_wrapper');
+
+        if ($("#assignmentTable").length > 0) {
+            var assignmentTable = $("#assignmentTable").dataTable({
+            });
+            var assignmentTableTools = new $.fn.dataTable.TableTools(assignmentTable, {
+                    "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+                });      
+            $(assignmentTableTools.fnContainer()).insertAfter('div#assignmentTable_wrapper');
+        }
+        if ($("#prioritiesTable").length > 0) {
+            var prioritiesTable = $("#prioritiesTable").dataTable({
+            });
+            var prioritiesTableTools = new $.fn.dataTable.TableTools(prioritiesTable, {
+                    "sSwfPath": "https://cdn.datatables.net/tabletools/2.2.2/swf/copy_csv_xls_pdf.swf"
+                });
+            $(prioritiesTableTools.fnContainer()).insertAfter('div#prioritiesTable_wrapper');
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <h2>My assignments</h2>
+    <br />
+    {% if award_setup_priorities or assignment_list %}
+        {% if award_setup_priorities %}
+            <h4>Award Setup Assignments</h4>
+            <table id="prioritiesTable" class="table table-striped table-bordered">
+                <thead>
+                    <th></th>
+                    <th>Proposal Number (or ATP ID)</th>
+                    <th width="50px">Award Number</th>
+                    <th>PI</th>
+                    <th>Agency</th>
+                    <th>Project Title</th>
+                    <th>Priority</th>
+                    <th>Date Assigned</th>
+                    <th>Assigned Person(s)</th>
+                    <th>Award Status</th>
+                    <th>Wait For</th>
+                    <th>Wait For Updated</th>
+                </thead>
+                <tbody>
+                    {% for entry in award_setup_priorities %}
+                        <tr>
+                            <td><a href="{{ entry.1 }}">Edit Award</a></td>
+                            {% with entry.0.get_first_real_proposal as proposal %}
+                                <td>{{ proposal.proposal_number|default:entry.0 }}</td>
+                                <td>{{ entry.0.get_award_numbers|default:"" }}</td>
+                                <td>{{ proposal.principal_investigator|default:"N/A" }}</td>
+                                <td>{{ proposal.agency_name|default:"N/A" }}</td>
+                                <td>{{ proposal.project_title|default:"N/A" }}</td>
+                                <td>{{ entry.0.get_award_priority_number }}</td>
+                                <td>{{ entry.0.get_date_assigned_to_current_stage }}</td>
+                                <td>{{ entry.0.get_current_active_users }}</td>
+                            {% endwith %}
+                            <td>
+                                {% if entry.0.award_dual_negotiation and entry.0.award_dual_setup %}
+                                    {{ entry.0.get_current_award_status_for_display }}
+                                {% elif entry.0.award_dual_modification and award_setup_modification_flag and entry.0.get_award_setup_modification_status %}
+                                    {{ entry.0.get_current_award_status_for_display }}
+                                {% else %}
+                                    {{ entry.0.get_status_display }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ entry.0.awardsetup.get_waiting_reason }}
+                            </td>
+                            <td>
+                                {{ entry.0.awardsetup.date_wait_for_updated | default:"" }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+        {% if assignment_list %}
+            {% if award_setup_priorities %}
+                <h4>All Other Assignments</h4>
+            {% else %}
+                <h4>All Assignments</h4>
+            {% endif %}
+            <table id="assignmentTable" class="table table-striped table-bordered">
+                <thead>
+                    <th></th>
+                    <th>Proposal Number (or ATP ID)</th>
+                    <th width="50px">Award Number</th>
+                    <th>PI</th>
+                    <th>Agency</th>
+                    <th>Project Title</th>
+                    <th>Date Assigned</th>
+                    <th>Assigned Person(s)</th>
+                    <th>Award Status</th>
+                </thead>
+                <tbody>
+                    {% for entry in assignment_list %}
+                        <tr>
+                            <td><a href="{{ entry.1 }}">Edit Award</a></td>
+                            {% with entry.0.get_first_real_proposal as proposal %}
+                                <td>{{ proposal.proposal_number|default:entry.0 }}</td>
+                                <td>{{ entry.0.get_award_numbers|default:"" }}</td>
+                                <td>{{ proposal.principal_investigator|default:"N/A" }}</td>
+                                <td>{{ proposal.agency_name|default:"N/A" }}</td>
+                                <td>{{ proposal.project_title|default:"N/A" }}</td>
+                                <td>{{ entry.0.get_date_assigned_to_current_stage }}</td>
+                                <td>{{ entry.0.get_current_active_users }}</td>
+                            {% endwith %}
+                            <td>
+                                {% if entry.0.award_dual_negotiation and entry.0.award_dual_setup or entry.0.award_dual_modification %}
+                                    {{ entry.0.get_current_award_status_for_display }}
+                                {% else %}
+                                    {{ entry.0.get_status_display }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% else %}
+        <p>You currently have no awards assigned to you.</p>
+    {% endif %}
+</div>
+
+<hr/>
+
+<div class="row">
+    <h2>Search for Awards</h2>
+    <ul class="list-inline pull-right">
+        <li><a href="{% url 'full_award_search' %}" class="btn btn-default">Search all fields</a></li>
+        <li><a href="{% url 'create_award_standalone' %}" class="btn btn-success">Create new award</a></li>
+    </ul>
+    <table id="awardTable" class="table table-striped table-bordered">
+        <thead>
+            <th>Proposal Number (or ATP ID)</th>
+            <th width="50px">Award Number</th>
+            <th>PI</th>
+            <th>Agency</th>
+            <th>Project Title</th>
+            <th>Date Assigned</th>
+            <th>Assigned Person(s)</th>
+            <th>Award Status</th>
+            <th>Wait For</th>
+        </thead>
+    </table>
+</div>
+
+<hr />
+
+<div class="row">
+    <h2>Proposal Planning search</h2>
+    <ul class="list-inline pull-right">
+        <li>
+            {% if request.GET.all_proposals %}
+                <a href="javascript:generateProposalIntakeUrl('{% url 'home' %}?upcoming_proposals=1')">View Upcoming Proposal Intakes</a>
+            {% else %}
+                <a href="javascript:generateProposalIntakeUrl('{% url 'home' %}?all_proposals=1')">View All Proposal Intakes</a>
+            {% endif %}
+        </li>
+        <li><a href="{% url 'create_proposal_intake' %}" class="btn btn-success pull-right">Create Proposal Intake</a></li>
+    </ul>
+    <table id="proposalIntakeTable" class="table table-striped table-bordered">
+        <thead>
+            <th></th>
+            <th>PI</th>
+            <th>Agency</th>
+            <th>Proposal Status</th>
+            <th>School</th>
+            <th>Cayuse Proposal Number</th>
+            <th>SPA I</th>
+            <th>Due date (sponsor deadline)</th>
+        </thead>
+        <tbody>
+            {% for intake in proposal_intakes %}
+                <tr>
+                    <td><a href="{% url 'edit_standalone_proposal_intake' intake.id %}">{{ intake }}</a></td>
+                    <td>{{ intake.principal_investigator|default_if_none:"" }}</td>
+                    <td>{{ intake.agency }}</td>
+                    <td>{{ intake.get_proposal_status }}</td>
+                    <td>{{ intake.school }}</td>
+                    <td>{{ intake.proposal_number }}</td>
+                    <td>{{ intake.spa1 }}</td>
+                    <td>{{ intake.proposal_due_to_sponsor|date:"m/d/Y"|default_if_none:"" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

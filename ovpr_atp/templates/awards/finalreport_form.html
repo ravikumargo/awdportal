@@ -1,0 +1,11 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_closeout %}
+{% if object %}
+    <h4>Edit {{ object }}</h4>
+{% else %}
+    <h4>New Final Report</h4>
+{% endif %}
+{% crispy form %}
+{% endblock %}

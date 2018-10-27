@@ -1,0 +1,70 @@
+<div class="panel-group">
+    {% if proposal != None %}
+        <h4>Proposal</h4>
+        <ul class="list-inline">
+            <li>
+                <h5>{{ proposal }}</h5>
+                {% include 'awards/_most_recent_revision.html' with latest_revision=proposal.get_most_recent_revision is_edited=proposal.is_edited %}
+            </li>
+            <li class="pull-right"><a href="{% url 'delete_proposal' award_pk=award.id proposal_pk=proposal.id %}" class="btn btn-sm btn-danger">Delete {{ proposal }}</a></li>
+            <li class="pull-right"><a href="{% url 'edit_proposal' award_pk=award.id proposal_pk=proposal.id %}" class="btn btn-sm btn-default">Edit {{ proposal }}</a></li>
+        </ul>
+        {% include 'awards/_section_detail.html' with instance=proposal %}
+
+        <br />
+        <p><strong>Principal Investigator</strong></p>
+        {% include 'awards/_section_detail.html' with instance=proposal.principal_investigator %}
+
+        <br />
+        <p><strong>Key Personnel</strong></p>
+        {% include 'awards/_subsection_detail.html' with subsection_items=proposal.keypersonnel_set.all add_subsection_url='add_key_personnel' subsection_editable=False %}
+
+        <br />
+        <p><strong>Performance Sites</strong></p>
+        {% include 'awards/_subsection_detail.html' with subsection_items=proposal.performancesite_set.all add_subsection_url='add_performance_site' subsection_editable=False %}
+    {% else %}
+        {% for proposal in award.get_proposals %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {% if forloop.first %}
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#{{ type }}-proposal-panel-0">Proposal</a>
+                        </h4>
+                    {% else %}
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#{{ type }}-proposal-panel-{{ forloop.counter0 }}">Supplemental Proposal #{{ forloop.counter0 }}</a>
+                        </h4>
+                    {% endif %}
+                </div>
+
+                <div id="{{ type }}-proposal-panel-{{ forloop.counter0 }}" class="panel-collapse proposal-section collapse proposal-id-{{proposal.id}}">
+                    <div class="panel-body">
+                        <ul class="list-inline">
+                            <li>
+                                <h5>{{ proposal }}</h5>
+                                {% include 'awards/_most_recent_revision.html' with latest_revision=proposal.get_most_recent_revision is_edited=proposal.is_edited %}
+                            </li>
+                            <li class="pull-right"><a href="{% url 'delete_proposal' award_pk=award.id proposal_pk=proposal.id %}" class="btn btn-sm btn-danger">Delete {{ proposal }}</a></li>
+                            <li class="pull-right"><a href="{% url 'edit_proposal' award_pk=award.id proposal_pk=proposal.id %}" class="btn btn-sm btn-default">Edit {{ proposal }}</a></li>
+                        </ul>
+                        {% include 'awards/_section_detail.html' with instance=proposal %}
+
+                        <br />
+                        <p><strong>Principal Investigator</strong></p>
+                        {% include 'awards/_section_detail.html' with instance=proposal.principal_investigator %}
+
+                        <br />
+                        <p><strong>Key Personnel</strong></p>
+                        {% include 'awards/_subsection_detail.html' with subsection_items=proposal.keypersonnel_set.all add_subsection_url='add_key_personnel' subsection_editable=False %}
+
+                        <br />
+                        <p><strong>Performance Sites</strong></p>
+                        {% include 'awards/_subsection_detail.html' with subsection_items=proposal.performancesite_set.all add_subsection_url='add_performance_site' subsection_editable=False %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>There are no proposals associated with this award.</p>
+        {% endfor %}
+    {% endif %}
+</div>

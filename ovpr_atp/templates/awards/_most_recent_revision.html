@@ -1,0 +1,3 @@
+{% if is_edited %}
+	<p class="pull-left"><em>Last edited by {{ latest_revision.0|default:"ATP" }} at {{ latest_revision.1 }}</em></p>
+{% endif %}

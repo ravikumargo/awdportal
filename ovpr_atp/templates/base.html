@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+    <head>
+        <title>OVPR Proposal Hub</title>
+
+        <link rel="shortcut icon" type="image/x-icon" href="{{STATIC_URL}}img/favicon.ico" />
+
+        <meta charset="UTF-8"/>
+
+        <link type="text/css" href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.min.css" rel="stylesheet">
+        <link type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/dataTables.tableTools.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/select2.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/select2-bootstrap.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/bootstrap-dialog.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/ovpr-atp.css" rel="stylesheet"/>
+        <link type="text/css" href="{{ STATIC_URL }}css/tool-tip.css" rel="stylesheet"/>
+
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-2.1.0.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.highlight.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.searchHighlight.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.sorting.natural.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.tableTools.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/select2.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-dialog.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/ovpr-atp.js"></script>
+
+        <script type="text/javascript">
+            var disableAutosave = {% if disable_autosave %}true{% else %}false{% endif %};
+
+            $(document).ready(function() {
+                if (!disableAutosave) {
+                    reloadTimer = setTimeout(autoReload, 600000);
+                }
+
+                $(document).ajaxStop(function() {
+                    scroll = getUrlParameter('scroll');
+                    if (scroll > -1) {
+                        $(window).scrollTop(scroll);
+                    }
+                });
+
+                $.fn.dataTable.defaults.searchHighlight = true;
+                $.fn.dataTable.TableTools.defaults.aButtons = [ 
+                    { 
+                        "sExtends": "copy",
+                        "sFieldBoundary": '"',
+                        "oSelectorOpts": {
+                            filter: "applied"
+                        }
+                    },
+                    {
+                        "sExtends": "xls",
+                        "sFieldBoundary": '"',
+                        "sFileName": "ATP Report.csv",
+                        "oSelectorOpts": {
+                            filter: "applied"
+                        }
+                    }
+                ];
+            });
+        </script>
+
+        {% block js %}
+        {% endblock %}
+    </head>
+    <style>
+        body {
+            background-color:#F8F8FF;
+            padding-bottom: 200px;
+        }
+        .white-text {color: #FFFFFF;}
+    </style>
+    <body>
+        <div class="container-fluid">
+            <div style="padding-bottom: 50px">
+                <div class="row">
+                    <div class="navbar navbar-fixed-top" role="navigation" style="background-color:#004065;">
+                        <div class="container-fluid">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                              </button>
+                              <a class="navbar-brand white-text" href="{% url 'home' %}">Award Tracking Portal (ATP)</a>
+                            </div>
+                            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                <ul class="nav navbar-nav navbar-right">
+                                    {% if user.is_authenticated %}
+                                        <li class="pull-right" style="margin-right:10px;"><a class="white-text" href="{% url 'logout' %}">Sign Out</a></li>
+                                        <li class="pull-right divider-vertical"></li>
+                                        {% if user.is_staff %}
+                                            <li class="dropdown pull-right">
+                                                <a href="#" class="dropdown-toggle white-text" data-toggle="dropdown">Imports<span class="caret"></span></a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li><a href="{% url 'get_cayuse_proposals' %}" class="white-text">Import Cayuse Proposals</a></li>
+                                              </ul>
+                                            </li>
+                                            <li class="dropdown pull-right">
+                                                <a href="#" class="dropdown-toggle white-text" data-toggle="dropdown">Reports<span class="caret"></span></a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li><a href="{% url 'admin:report_builder_report_changelist' %}">ATP Reports</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="{% url 'get_proposal_statistics_report' %}" class="white-text">Proposal Statistics Report</a></li>
+                                              </ul>
+                                            </li>
+                                            <li class="dropdown pull-right">
+                                                <a href="#" class="dropdown-toggle white-text" data-toggle="dropdown">Admin<span class="caret"></span></a>
+                                                <ul class="dropdown-menu" role="menu">
+                                                    <li><a href="{% url 'admin:awards_award_changelist' %}" class="white-text">Admin interface</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="{% url 'audittrail_activity_history' %}" class="white-text">AuditTrail Activity History</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="{% url 'award_re_assignment' %}" class="white-text">Re-assignment</a></li>
+                                                    <li class="divider"></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_allow_schedule' %}">Update Allowed Cost Schedules</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_award_manager' %}">Update Award Managers</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_award_organization' %}">Update Award Organizations</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_award_template' %}">Update Award Templates</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_cfda_number' %}">Update CFDA Numbers</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_fedneg_rate' %}">Update Federal Negotiated Rates</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_fund_sources' %}">Update Funding Sources</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_indirect_cost' %}">Update Indirect Cost Schedules</a></li>
+                                                    <li><a href="{% url 'import_eas_data' 'get_prime_sponsor' %}">Update Prime Sponsors</a></li>
+                                              </ul>
+                                            </li>
+                                        {% endif %}
+                                        <li class="pull-right"><p class="navbar-text white-text">Hi, {{ user.get_full_name }}</p></li>
+                                    {% endif %}
+                                    <div class="navbar-text white-text pull-right">
+                                        <li id="autosave-pending" class="autosave-message"><strong>Unsaved changes</strong></li>
+                                        <li id="autosave-saving" class="autosave-message"><strong>Saving...</strong></li>
+                                        <li id="autosave-saved" class="autosave-message"><strong>Saved</strong></li>
+                                        <li id="autosave-form-error" class="autosave-message"><strong>FORM ERRORS DETECTED</strong></li>
+                                        <li id="autosave-ajax-error" class="autosave-message"><strong>ERROR - DATA NOT SAVED</strong></li>
+                                        <li id="autosave-disabled" class="autosave-message"><strong>Autosave disabled for this form</strong></li>
+                                    </div>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% block award_nav %}{% endblock %}
+            </div>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="row" style="margin-top:20px">
+                            <div class="center-block">
+                                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} alert-dismissable col-md-12">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                    {{ message }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+        <footer class="navbar-fixed-bottom" style="background-color:#004065; padding-left:0; padding-right:0; margin-top:20px; margin-left:0; width:100%;">
+            <div class="container-fluid">
+            <div class="col-md-6 pull-left" style="color:#ffffff;margin:10px;">
+                <strong>The George Washington University</strong> | <a href="http://research.gwu.edu" style="color:#ffffff;">Office of the Vice President for Research</a>
+            </div>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,41 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_setup %}
+{% if object %}
+    <h4>Edit {{ object }}</h4>
+{% else %}
+    <h4>New PTA number</h4>
+{% endif %}
+{% crispy form %}
+
+<script>
+
+$(document).ready(function() {
+
+   enableDisableFields();
+   $('#id_ready_for_eas_setup').change(function() {
+      enableDisableFields();
+   });
+});
+
+function enableDisableFields () {
+
+	if ($('#id_ready_for_eas_setup').val() == 'M') {
+
+		//$('#id_award_number').prop('disabled', false);
+	    //$('#id_award_setup_complete').prop('disabled', false);
+        $('#id_award_number').removeAttr('readonly');
+        $('#id_award_setup_complete').removeAttr('readonly');
+
+	} else {
+		//$('#id_award_number').prop('disabled', true);
+        //$('#id_award_setup_complete').prop('disabled', true);
+        $('#id_award_number').attr('readonly', 'readonly');
+        $('#id_award_setup_complete').attr('readonly', 'readonly');
+	}
+}
+
+</script>
+
+{% endblock %}

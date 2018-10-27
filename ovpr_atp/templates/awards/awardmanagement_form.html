@@ -1,0 +1,14 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_management %}
+    {% crispy form %}
+    <div class="clearfix"></div>
+    <hr />
+    <h4>Prior Approval / NCE</h4>
+    {% include 'awards/_subsection_detail.html' with subsection_items=award.priorapproval_set.all add_subsection_url='add_prior_approval' subsection_editable=True %}
+    <div class="clearfix"></div>
+    <hr />
+    <h4>Report Submissions</h4>
+    {% include 'awards/_subsection_detail.html' with subsection_items=award.reportsubmission_set.all add_subsection_url='add_report_submission' subsection_editable=True %}
+{% endblock %}

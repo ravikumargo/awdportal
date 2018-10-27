@@ -1,0 +1,20 @@
+{% for field, value, boolean_field in fields %}
+    {% if forloop.first %}
+        <div class="row">
+    {% endif %}
+
+    <p class="col-md-6"><strong>{{ field|capfirst }}:</strong> 
+        {% if boolean_field %}
+            {{ value|yesno:"Yes,No,Not specified" }}
+        {% else %}
+            {{ value }}
+        {% endif %}
+    </p>
+
+    {% if forloop.counter|divisibleby:'2' or forloop.last %}
+        </div>
+        {% if not forloop.last %}
+            <div class="row">
+        {% endif %}
+    {% endif %}
+{% endfor %}

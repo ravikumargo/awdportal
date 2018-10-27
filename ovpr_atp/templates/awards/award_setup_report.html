@@ -1,0 +1,52 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_setup %}
+<h3>Award Setup EAS Report</h3>
+
+<div class="container-fluid">
+    {% with proposal=award.get_most_recent_proposal %}
+        {% if proposal %}
+            <ul class="list-inline">
+                <li><h4>Proposal</h4></li>
+                <li><a href="{{ proposal.get_absolute_url }}" class="btn btn-sm btn-default">Edit</a></li>
+            </ul>
+            {% include 'awards/_field_iterator.html' with fields=proposal.get_award_setup_report_fields %}
+        {% else %}
+            <h4>Proposal</h4>
+            <p>No proposal is attached to this award.</p>
+        {% endif %}
+    {% endwith %}
+
+    {% with award_acceptance=award.get_current_award_acceptance %}
+        <ul class="list-inline">
+            <li><h4>Award Intake</h4></li>
+            <li><a href="{{ award_acceptance.get_absolute_url }}" class="btn btn-sm btn-default">Edit</a></li>
+        </ul>
+        {% include 'awards/_field_iterator.html' with fields=award_acceptance.get_award_setup_report_fields %}
+    {% endwith %}
+
+    {% with award_negotiation=award.get_current_award_negotiation %}
+        <ul class="list-inline">
+            <li><h4>Award Negotiation</h4></li>
+            <li><a href="{{ award_negotiation.get_absolute_url }}" class="btn btn-sm btn-default">Edit</a></li>
+        </ul>
+        {% include 'awards/_field_iterator.html' with fields=award_negotiation.get_award_setup_report_fields %}
+    {% endwith %}
+
+    {% with award_setup=award.awardsetup %}
+        <ul class="list-inline">
+            <li><h4>Award Setup</h4></li>
+            <li><a href="{{ award_setup.get_absolute_url }}" class="btn btn-sm btn-default">Edit</a></li>
+        </ul>
+        <h5>PTA #s</h5>
+        {% include 'awards/_subsection_detail.html' with subsection_items=award.ptanumber_set.all  subsection_editable=False %}
+        <hr />
+        {% include 'awards/_field_iterator.html' with fields=award_setup.get_award_setup_report_fields %}
+    {% endwith %}
+
+    <a href="{% url 'edit_award_setup' award.id %}" class="btn btn-default pull-right">Back to full award view</a>
+
+</div>
+
+{% endblock %}

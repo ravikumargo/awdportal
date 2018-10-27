@@ -1,0 +1,14 @@
+#popup{
+    position: fixed;
+    background: #fff;
+    display: none;
+    top: 195px;
+    left: 625px;
+    width: 550px;
+    height: 250px;
+    border: 1px solid #000;
+    z-index:3;
+    border-radius: 5px;
+    padding: 5px;
+    color: #000;
+}

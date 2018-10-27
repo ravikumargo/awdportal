@@ -1,0 +1,10 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_closeout %}
+    {% crispy form %}
+    <div class="clearfix"></div>
+    <hr />
+    <h4>Final Reports</h4>
+    {% include 'awards/_subsection_detail.html' with subsection_items=award.finalreport_set.all add_subsection_url='add_final_report' subsection_editable=True %}
+{% endblock %}

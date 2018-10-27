@@ -1,0 +1,8 @@
+<h4>Delete {{ object }}</h4>
+_confi<form action="" method="post">{% csrf_token %}
+    <p>Are you sure you want to delete "{{ object }}"?</p>
+    <div class="inline-block">
+        <a href="javascript:history.back()" class="btn btn-default">Cancel</a>
+        <input type="submit" class="btn btn-danger" value="Delete {{ object }}">
+    </div>
+</form>

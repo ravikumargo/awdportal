@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<style>
+#re_assign_awards_div{
+overflow-y:scroll;
+height:300px;
+}
+#re_assign_no_data_div{
+height:300px;
+}
+</style>
+<h3>Award Re-assignment Workflow</h3>
+
+<p>Select ATP user and Re-assigned user</p>
+
+{% crispy form %}
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function() {
+        $("#re_assign_awards_div").hide();
+        $("#id_atp_user").change(function(){
+            $("#re_assign_awards_div").hide();
+            $("#re_assign_no_data_div").hide();
+            if($("#id_atp_user").val()){
+                var atp_user=$("#id_atp_user").val();
+                var request_url = '/awards/get_re_assignment_awards/' + atp_user + '/';
+                $.ajax({
+                    url: request_url,
+                    dataType:'json',
+                    data: {
+                    },
+                    success: function (data) {
+                        if (!$.trim(data)){
+                            $("#re_assign_no_data_div").show();
+                            $("#re_assign_no_data_div").html("<span>No Assignments are there for this user</span>");
+                        }
+                        else{
+                            $("#re_assign_awards_div").html(data['table_string']);
+                            $("#id_user_department").html(data['drop_string']);
+                            $("#id_user_department").html($("#id_user_department option").sort(function (a, b) {
+                            return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
+                            }));
+                            $("#id_user_department").val('');
+                            $("#re_assign_awards_div").show();
+                        }
+                    }
+                    });
+            }
+            else{
+                $("#re_assignment_div").hide();
+                $("#re_assign_no_data_div").hide();
+            }
+        });
+
+
+        $("#id_user_department").change(function(){
+            if (!$("#id_user_department").val()){
+                var atp_user=$("#id_atp_user").val();
+                var request_url = '/awards/get_re_assignment_awards/' + atp_user + '/';
+                $.ajax({
+                    url: request_url,
+                    dataType:'json',
+                    data: {
+                    },
+                    success: function (data) {
+                        if (!$.trim(data)){
+                            $("#re_assign_no_data_div").show();
+                            $("#re_assign_no_data_div").html("<span>No Assignments are there for this user</span>");
+                        }
+                        else{
+                            $("#re_assign_awards_div").html(data['table_string']);
+                            $("#id_user_department").html(data['drop_string']);
+                            $("#re_assign_awards_div").show();
+                        }
+                    }
+                    });
+            }
+            if($("#id_user_department").val()){
+                var user_dept=$("#id_user_department").val();
+                var atp_user=$("#id_atp_user").val();
+                var request_url = '/awards/get_department_awards/' + atp_user + '/' + user_dept + '/';
+                $.ajax({
+                    url: request_url,
+                    dataType:'json',
+                    data: {
+                    },
+                    success: function (data) {
+                        $("#re_assign_awards_div").hide();
+                        $("#re_assign_awards_div").html(data['table_string']);
+                        $("#re_assign_awards_div").show();
+                    }
+                    });
+            }
+            else{
+                $("#re_assignment_div").hide();
+                $("#re_assign_no_data_div").hide();
+
+            }
+        });
+
+
+    });
+</script>
+{% endblock %}

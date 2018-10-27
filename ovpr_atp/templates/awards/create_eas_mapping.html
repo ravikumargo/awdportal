@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Create new EAS mapping</h2>
+
+<p>While importing that proposal, ATP didn't recognize the value of <strong>{{ incoming_value }}</strong> for the field <strong>{{ field }}</strong>.</p> 
+
+<p>Please select the correct value for <strong>{{ incoming_value }}</strong> from the list of EAS-compatible values below.</p>
+
+{% crispy form %}
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function() {
+        $(".select2").not(".award-manager-select").select2();
+        $(".award-manager-select").select2({minimumInputLength:2});
+    });
+</script>
+{% endblock %}

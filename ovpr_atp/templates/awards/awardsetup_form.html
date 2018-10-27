@@ -1,0 +1,10 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_setup %}
+    {% crispy form %}
+    <div class="clearfix"></div>
+    <hr />
+    <h4>PTA #s</h4>
+    {% include 'awards/_subsection_detail.html' with subsection_items=award.ptanumber_set.all add_subsection_url='add_pta_number' subsection_editable=True %}
+{% endblock %}

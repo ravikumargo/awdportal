@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        $('#proposalTable').dataTable({
+            "ajax": "{% url 'get_lotus_proposals_ajax' award.pk %}",
+            "deferRender": true,
+            "order": [[ 4, "desc" ]]
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <h2>Choose a proposal</h2>
+    <p>These proposals were imported from Lotus Notes when ATP went live.</p>
+    <table id="proposalTable" class="table table-striped table-bordered">
+        <thead>
+            <th></th>
+            <th>Lotus ID</th>
+            <th>Title</th>
+            <th>Principal Investigator</th>
+            <th>Submission date</th>
+        </thead>
+    </table>
+</div>
+{% endblock %}

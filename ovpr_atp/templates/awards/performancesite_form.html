@@ -1,0 +1,11 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block proposals %}
+{% if object %}
+    <h4>Edit {{ object }}</h4>
+{% else %}
+    <h4>New performance site</h4>
+{% endif %}
+{% crispy form %}
+{% endblock %}

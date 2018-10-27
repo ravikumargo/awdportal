@@ -1,0 +1,24 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block proposals %}
+{% if object %}
+    <h4>Edit {{ object }}</h4>
+{% else %}
+    <h4>New {{ object }}</h4>
+{% endif %}
+
+{% crispy form %}
+
+{% if object %}
+    <div class="clearfix"></div>
+    <br />
+    <p><strong>Key Personnel</strong></p>
+    {% include 'awards/_subsection_detail.html' with subsection_items=proposal.keypersonnel_set.all add_subsection_url='add_key_personnel' subsection_editable=True %}
+
+    <div class="clearfix"></div>
+    <br />
+    <p><strong>Performance Sites</strong></p>
+    {% include 'awards/_subsection_detail.html' with subsection_items=proposal.performancesite_set.all add_subsection_url='add_performance_site' subsection_editable=True %}
+{% endif %}
+{% endblock %}

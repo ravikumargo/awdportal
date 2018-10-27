@@ -1,0 +1,20 @@
+<div class="container-fluid">
+    {% for title, fields in instance.get_fieldsets %}
+        {% if not forloop.last %}
+            <h5 class="fieldset-title">{{ title|upper }}</h5>
+        {% else %}
+            <br />
+        {% endif %}
+
+        {% include 'awards/_field_iterator.html' with fields=fields%}
+    {% endfor %}
+
+    {% if instance.DISPLAY_TABLES %}
+        {% include 'awards/_display_tables.html' with display_tables=instance.get_display_tables %}
+    {% endif %}
+
+    {% if instance.comments != None %}
+        <h5 class="fieldset-title">COMMENTS</h5>
+        {{ instance.comments|default:"None"|linebreaks }}
+    {% endif %}
+</div>

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+        $('#proposalTable').dataTable({
+            "order": [[ 4, "desc" ]]
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <h2>Choose a proposal</h2>
+    {% if all_proposals %}
+        <p>Showing all proposals in Cayuse.</p>
+    {% else %}
+        <p>Showing all proposals modified in the last six months. <a href="{% url 'pick_proposal' award_pk=award.id %}?all-proposals=1">Click here to see all proposals.</a></p>
+    {% endif %}
+    <table id="proposalTable" class="table table-striped table-bordered">
+        <thead>
+            <th></th>
+            <th>Proposal Number</th>
+            <th>Title</th>
+            <th>Principal Investigator</th>
+            <th>Submission date</th>
+        </thead>
+        <tbody>
+            {% for proposal in proposals %}
+                {% if proposal.proposal_id %}
+                <tr>
+                    <td><a href="{% url 'import_proposal' proposal_id=proposal.proposal_id award_pk=award.id %}">Add to award</a></td>
+                    <td>{{ proposal.proposal_number }}</td>
+                    <td>{{ proposal.project_title }}</td>
+                    <td>{{ proposal.principal_investigator }}</td>
+                    <td>{{ proposal.submission_date }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

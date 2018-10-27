@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row">
+    {% if award %}
+        <h2>Edit {{ award }}</h2>
+        <h3>Change assignments</h3>
+    {% else %}
+        <h2>Create award</h2>
+    {% endif %}
+    <p>The Award Negotiation and Subaward sections are optional. To include them in this award, assign a user to them below.</p>
+    <p>If you do not see a user you expect in the drop down for a section, then that user has not been assigned to that group in the administrative interface. Contact an ATP admin to add your user to the appropriate group.</p>
+    {% crispy form %}
+</div>
+{% endblock %}

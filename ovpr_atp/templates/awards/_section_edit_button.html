@@ -1,0 +1,13 @@
+{% if instance.get_class_name in editable_sections %}
+    <div class="clearfix">
+        {% include 'awards/_most_recent_revision.html' with latest_revision=instance.get_most_recent_revision is_edited=instance.is_edited %}
+        <ul class="list-inline pull-right">
+            {% if instance.get_class_name == 'AwardAcceptance' %}
+                <li><a href="{% url 'create_modification' award.id %}" class="btn btn-small btn-default">Create modification</a></li>
+            {% elif instance.get_class_name == 'AwardSetup' %}
+                <li><a href="{% url 'award_setup_report' award.id %}" class="btn btn-small btn-default">View Award Setup EAS Report</a></li>
+            {% endif %}
+            <li><a href="{{ instance.get_absolute_url }}" class="btn btn-small btn-default">Edit {{ instance.get_verbose_class_name|title }}</a></li>
+        </ul>
+    </div>
+{% endif %}

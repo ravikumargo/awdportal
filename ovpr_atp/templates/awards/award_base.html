@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript">
+    function expandProposals() {
+        $('#edit-proposals').collapse('show');
+    }
+
+    function expandLatestProposal() {
+        $('#edit-proposals .panel-collapse').last().collapse('show');
+    }
+
+    function expandEditedProposal(proposalID) {
+        $('.proposal-id-' + proposalID).collapse('show');
+    }
+
+    function expandAwardIntake() {
+        $('#edit-award-intake').collapse('show');
+    }
+
+    $(document).ready(function() {
+        var offset = 110;
+
+        $('.sidenavLink').click(function(event) {
+            event.preventDefault();
+            $($(this).attr('href'))[0].scrollIntoView();
+            scrollBy(0, -offset);
+
+            var targetId = $(this).attr('href');
+            var $target = $(targetId).next('.panel-collapse');
+            if ($target.length > 0) {
+                $target.collapse('show');
+            }
+        });
+
+        $("#open_popup").click(function(){
+            $("#popup").css("display", "block");
+        });
+        $("#close_popup").click(function(){
+            $("#popup").css("display", "none");
+        });
+        $("#close_popup_top").click(function(){
+            $("#popup").css("display", "none");
+        });
+        $(".panel-collapse").removeClass('in');
+        var pathArray = window.location.pathname.split('/');
+        var anchorArray = window.location.href.split('#');
+
+        var element = "";
+        if (pathArray[3] != "") {
+            element = pathArray[3];
+        } else if (anchorArray.length > 1 && anchorArray[1] != "") {
+            element = anchorArray[1];
+        }
+
+        if (element != "") {
+            if ($.inArray(element, ["create-proposal", "edit-proposal", "delete-proposal", "add-key-personnel", "edit-key-personnel", "delete-key-personnel", "add-performance-site", "edit-performance-site", "delete-performance-site"]) > -1) {
+                element = "edit-proposals";
+            } else if (element == "create-modification") {
+                element = "edit-award-intake";
+            } else if ($.inArray(element, ["add-pta-number", "edit-pta-number", "delete-pta-number", "award-setup-report", "ptanumbers"]) > -1) {
+                element = "edit-award-setup";
+            } else if ($.inArray(element, ["add-subaward", "edit-subaward", "delete-subaward", "subawards"]) > -1) {
+                element = "edit-subawards";
+            } else if ($.inArray(element, ["add-prior-approval", "edit-prior-approval", "delete-prior-approval", "add-report-submission", "edit-report-submission", "delete-report-submission"]) > -1) {
+                element = "edit-award-management";
+            } else if ($.inArray(element, ["add-final-report", "edit-final-report", "delete-final-report"]) > -1) {
+                element = "edit-award-closeout";
+            }
+            document.getElementById(element).className += ' in';
+        }
+
+        scroll = getUrlParameter('scroll');
+        if (scroll > -1) {
+            $(window).scrollTop(scroll);
+        }
+
+        awardPattern = /^\/awards\/\d+\/$/;
+        createProposalPattern = /(import|create)-.*proposal/g;
+        easMappingPattern = /create-eas-mapping/g;
+        createAwardPattern = /create-award/g;
+        editProposalPattern = /edit-proposal\/(\d+)\//g;
+        if (awardPattern.test(window.location.pathname)) {
+            previousPage = document.referrer;
+            if (createProposalPattern.test(previousPage) || easMappingPattern.test(previousPage)) {
+                expandProposals();
+                expandLatestProposal();
+                expandAwardIntake();
+            } else if (editProposalPattern.test(previousPage)) {
+                expandProposals();
+                editProposalPattern.exec(previousPage);  // First exec on the regex returns null, but second does not.  Ignoring first call here.
+                expandEditedProposal(editProposalPattern.exec(previousPage)[1]);
+            } else if (createAwardPattern.test(previousPage)) {
+                expandProposals();
+            }
+        }
+    });
+</script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/section-form.js"></script>
+{% endblock %}
+
+{% block award_nav %}
+<div style="padding-bottom: 20px">
+    <div class="award-nav" data-spy="affix" data-offset-top="60" data-offset-bottom="20">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                <ul class="list-inline">
+                    <li class="white-text"><strong>{{ award }}:</strong></li>
+                    <li><a class="sidenavLink white-text" href="#proposalIntake">Proposal Intake</a></li>
+                    <li><a class="sidenavLink white-text" href="#proposal">Proposal</a></li>
+                    <li><a class="sidenavLink white-text" href="#awardIntake">Award Intake</a></li>
+                    <li><a class="sidenavLink white-text" href="#awardNegotiation">Award Negotiation</a></li>
+                    <li><a class="sidenavLink white-text" href="#awardSetup">Award Setup</a></li>
+                    <li><a class="sidenavLink white-text" href="#awardModification">Award Modification</a></li>
+                    <li><a class="sidenavLink white-text" href="#subawards">Subawards</a></li>
+                    <li><a class="sidenavLink white-text" href="#awardManagement">Award Management</a></li>
+                    <li><a class="sidenavLink white-text" href="#awardCloseout">Award Closeout</a></li>
+                </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="row" style="margin-top: 10px;">
+        <div class="col-md-6">
+            <h2 id="awardTitle" style="margin-top: 0px;">{{ award }}</h2>
+            <h4><strong>Current status:</strong> {% if award.award_dual_negotiation and award.award_dual_setup or award.award_dual_modification %}
+                                                    {% if award.get_award_setup_modification_status %}
+                                                        {{ award.get_current_award_status_for_display }}
+                                                    {% else %}
+                                                        {{ award.get_status_display }}
+                                                    {% endif %}
+                                                 {% else %}
+                                                    {{ award.get_status_display }}
+                                                 {% endif %}
+            </h4>
+        </div>
+        <div class="col-md-6">
+            <a href="{% url 'edit_award' award_pk=award.id %}" class="btn btn-small btn-default pull-right">Edit assignments</a>
+        </div>
+    </div>
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div id="proposalIntake" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-proposal-intake">Proposal Intake <em>({{ award.proposalintake.spa1|default:"N/A" }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-proposal-intake" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block proposal_intake %}
+                        {% include 'awards/_section_edit_button.html' with instance=award.proposalintake %}
+                        {% include 'awards/_section_detail.html' with instance=award.proposalintake %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="proposal" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-proposals">Proposal</a>
+                </h3>
+            </div>
+            <div id="edit-proposals" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block proposals %}
+                        {% if award.get_proposals|length == 1 %}
+                            {% include 'awards/_proposal_detail.html' with proposal=award.get_proposals.0 %}
+                        {% else %}
+                            {% include 'awards/_proposal_detail.html' %}
+                        {% endif %}
+                        <div class="clearfix"></div>
+                        <br />
+                        <ul class="list-inline">
+                            <li><a href="{% url 'pick_proposal' award_pk=award.id %}" class="btn btn-info">Import proposal from Cayuse</a></li>
+                            <li><a href="{% url 'pick_lotus_proposal' award_pk=award.id %}" class="btn btn-info">Import proposal from Lotus</a></li>
+                            <li><a href="{% url 'create_proposal' award_pk=award.id %}" class="btn btn-info">Add empty proposal</a></li>
+                        </ul>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="awardIntake" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-award-intake">Award Intake <em>({{ award.award_acceptance_user.get_full_name|default:"N/A" }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-award-intake" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block award_acceptance %}
+                        {% include 'awards/_section_modification_detail.html' with previous_modifications=award.get_previous_award_acceptances instance=award.get_current_award_acceptance award=award type="acc" %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="awardNegotiation" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-award-negotiation">Award Negotiation <em>({{ award.award_negotiation_user.get_full_name|default:"N/A" }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-award-negotiation" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block award_negotiation %}
+                        {% if award.award_negotiation_user %}
+                            {% include 'awards/_section_modification_detail.html' with previous_modifications=award.get_previous_award_negotiations instance=award.get_current_award_negotiation type="neg" %}
+                        {% else %}
+                            <p>There is no Award Negotiation section for this award. Contact an ATP administrator to add one.</p>
+                        {% endif %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="awardSetup" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-award-setup">Award Setup <em>({{ award.award_setup_user.get_full_name }})</em> &nbsp; &nbsp; &nbsp; Award Modification <em>({{ award.award_modification_user.get_full_name|default:"N/A" }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-award-setup" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block award_setup %}
+                        {% include 'awards/_section_edit_button.html' with instance=award.awardsetup %}
+                        {% if award_modification_flag %}
+                            {% if modification_obj %}
+                                {% include 'awards/_section_detail.html' with instance=modification_obj %}
+                            {% else %}
+                                {% include 'awards/_section_detail.html' with instance=award.awardsetup %}
+                            {% endif %}
+                        {% else %}
+                            {% include 'awards/_section_detail.html' with instance=award.awardsetup %}
+                        {% endif %}
+                        <div class="clearfix"></div>
+                        <hr />
+                        <h4>PTA #s</h4>
+                        <div class="clearfix">
+                        {% if pta_nuber_instance %}
+                            {% include 'awards/_most_recent_revision.html' with latest_revision=pta_nuber_instance.get_recent_ptanumber_revision is_edited=pta_nuber_instance.is_edited %}
+                        {% endif %}
+                        </div>
+                        {% include 'awards/_subsection_detail.html' with subsection_items=award.ptanumber_set.all add_subsection_url='add_pta_number' subsection_editable=False %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="subawards" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-subawards">Subawards <em>({{ award.subaward_user.get_full_name|default:"N/A" }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-subawards" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block subawards %}
+                        {% if award.subaward_user %}
+                            {% if 'Subaward' in editable_sections %}
+                                <a href="{% url 'edit_subawards' award_pk=award.id %}" class="btn btn-small btn-default pull-right">Edit Subawards</a>
+                                <div style="clear:both;"><!--Filler--></div>
+                            {% endif %}
+                            <div class="panel-group">
+                                {% for subaward in award.subaward_set.all %}
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="accordion-toggle" data-toggle="collapse" data-target="#subaward-panel-{{ forloop.counter0 }}">{{ subaward }}</a>
+                                            </h4>
+                                        </div>
+                                        <div id="subaward-panel-{{ forloop.counter0 }}" class="panel-collapse modification-section collapse">
+                                            <div class="panel-body">
+                                                {% with instance.get_most_recent_revision as latest_revision %}
+
+                                                    <div class="clearfix">
+                                                        {% include 'awards/_most_recent_revision.html' with latest_revision=subaward.get_most_recent_revision is_edited=subaward.is_edited %}
+                                                    </div>
+
+                                                {% endwith %}
+
+                                                {% include 'awards/_section_detail.html' with instance=subaward %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% empty %}
+                                    <p>No subawards</p>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>There is no Subaward section for this award. Contact an ATP administrator to add one.</p>
+                        {% endif %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="awardManagement" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-award-management">Award Management <em>({{ award.award_management_user.get_full_name }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-award-management" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block award_management %}
+                        {% include 'awards/_section_edit_button.html' with instance=award.awardmanagement %}
+                        {% include 'awards/_section_detail.html' with instance=award.awardmanagement %}
+                        <div class="clearfix"></div>
+                        <hr />
+                        <h4>Prior Approval / NCE</h4>
+                        {% include 'awards/_subsection_detail.html' with subsection_items=award.priorapproval_set.all add_subsection_url='add_prior_approval' subsection_editable=False %}
+                        <div class="clearfix"></div>
+                        <hr />
+                        <h4>Report Submissions</h4>
+                        {% include 'awards/_subsection_detail.html' with subsection_items=award.reportsubmission_set.all add_subsection_url='add_report_submission' subsection_editable=False %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div id="awardCloseout" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-award-closeout">Award Closeout <em>({{ award.award_closeout_user.get_full_name }})</em></a>
+                </h3>
+            </div>
+            <div id="edit-award-closeout" class="panel-collapse collapse">
+                <div class="panel-body">
+                    {% block award_closeout %}
+                        {% include 'awards/_section_edit_button.html' with instance=award.awardcloseout %}
+                        {% include 'awards/_section_detail.html' with instance=award.awardcloseout %}
+                        <div class="clearfix"></div>
+                        <hr />
+                        <h4>Final Reports</h4>
+                        {% include 'awards/_subsection_detail.html' with subsection_items=award.finalreport_set.all add_subsection_url='add_final_report' subsection_editable=False %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

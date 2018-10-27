@@ -1,0 +1,20 @@
+{% extends "awards/award_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block award_acceptance %}
+<h4>Create a modification</h4>
+<form action="" method="post">{% csrf_token %}
+    <p>If you choose to create a modification for this award, ATP will take the following actions:</p>
+    <ol>
+        <li>The data for the existing Award Intake and Award Negotiation sections will be moved into read-only records.</li>
+        <li>The award's status will be reset to Award Intake, and the user assigned to Award Intake will receive an email alert.</li>
+    </ol>
+
+    <p>Do you want to proceed and create a modification on this award?</p>
+    <input type="hidden" name="_method" value="update">
+    <div class="inline-block">
+        <a href="javascript:history.back()" class="btn btn-default">Cancel</a>
+        <input type="submit" class="btn btn-primary" value="Create modification">
+    </div>
+</form>
+{% endblock %}

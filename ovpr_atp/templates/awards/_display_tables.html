@@ -1,0 +1,27 @@
+{% load humanize %}
+
+{% for table in display_tables %}
+    <h5 class="fieldset-title">{{ table.title|upper }}</h5>
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    {% for column in table.columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table.rows %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        {% for field, value in row.fields %}
+                            <td>{{ value|intcomma }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endfor %}

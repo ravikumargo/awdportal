@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h4>Select Award Type</h4>
+<form action="{% url 'redirect_to_award_details' award_pk=award_pk %}" method="post">{% csrf_token %}
+     <select name="award_text">
+      <option value="Original Award">Original Award</option>
+      <option value="Modification">Modification</option>
+      <option value="Administrative Establishment">Administrative Establishment</option>
+      <option value="Administrative Funding">Administrative Funding</option>
+    </select>
+    <div class="inline-block">
+        <input type="submit" value="Continue" class="btn btn-primary" style="margin-left: 18px; margin-bottom: -68px;">
+    </div>
+</form>
+{% endblock %}

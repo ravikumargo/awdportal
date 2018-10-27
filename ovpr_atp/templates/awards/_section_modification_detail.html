@@ -1,0 +1,51 @@
+    <div class="panel-group">
+        {% for modification in previous_modifications %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {% if forloop.first %}
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#{{ type }}-modification-panel-0">Original Award</a>
+                        </h4>
+                    {% else %}
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#{{ type }}-modification-panel-{{ forloop.counter0 }}">{{ modification.award_text }}</a>
+                        </h4>
+                    {% endif %}
+                </div>
+
+                <div id="{{ type }}-modification-panel-{{ forloop.counter0 }}" class="panel-collapse modification-section collapse">
+                    <div class="panel-body">
+                        <div class="clearfix">
+                            {% include 'awards/_most_recent_revision.html' with latest_revision=modification.get_most_recent_revision is_edited=instance.is_edited %}
+                        </div>
+                        {% include 'awards/_section_detail.html' with instance=modification %}
+                    </div>
+                </div>
+            </div>
+            {% if forloop.last %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a class="accordion-toggle" data-toggle="collapse" data-target="#{{ type }}-modification-panel-{{ forloop.counter0|add:'1' }}">{{ instance.award_text }}</a>
+                        </h4>
+                    </div>
+                    <div id="{{ type }}-modification-panel-{{ forloop.counter0|add:'1' }}" class="panel-collapse modification-section collapse">
+                        <div class="panel-body">
+                            <div class="clearfix">
+                                {% include 'awards/_section_edit_button.html' with instance=instance %}
+                            </div>
+                            {% include 'awards/_section_detail.html' with instance=instance %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% empty %}
+            {% if award.award_text %}
+                <h4>{{ award.award_text }}</h4>
+            {% else %}
+                <h4>Original Award</h4>
+            {% endif %}
+            {% include 'awards/_section_edit_button.html' with instance=instance %}
+            {% include 'awards/_section_detail.html' with instance=instance %}
+        {% endfor %}
+    </div>

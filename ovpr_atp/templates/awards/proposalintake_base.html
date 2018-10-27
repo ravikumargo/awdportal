@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block js %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+
+<script type="text/javascript">
+    var disableAutosave = {% if disable_autosave %}true{% else %}false{% endif %};
+</script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/section-form.js"></script>
+{% endblock %}
+
+{% block content %}
+<link type="text/css" href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet"/>
+<div class="row">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div id="proposalIntake" class="panel-heading">
+                <h3 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-target="#edit-proposal-intake">{{ proposalintake|default:"New Proposal Intake" }}</a>
+                </h3>
+            </div>
+            <div id="edit-proposal-intake" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    {% block proposal_intake %}
+                        {% include 'awards/_section_edit_button.html' with instance=proposalintake %}
+                        {% include 'awards/_section_detail.html' with instance=proposalintake %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if proposalintake %}
+        {% if not proposalintake.award %}
+            <a href="{% url 'create_award' proposalintake.id %}" class="btn btn-success pull-right">Create an award</a>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

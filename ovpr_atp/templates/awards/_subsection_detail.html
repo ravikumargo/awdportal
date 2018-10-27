@@ -1,0 +1,47 @@
+{% for item in subsection_items %}
+    {% with item_data=item.get_table_fields %}
+        {% if forloop.first %}
+            <div style="overflow-x: auto">
+            <table class="atp-button-table table table-striped">
+            <thead>
+                <tr>                    
+                    {% if subsection_editable %}
+                        <th></th>
+                    {% endif %}
+                    {% for field in item_data %}
+                        <th>{{ field.0|capfirst }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+        {% endif %}
+        
+        <tr>
+            {% for field in item_data %}
+                {% if forloop.first and subsection_editable %}
+                    <td><a href="{{ item.get_absolute_url }}" class="btn btn-xs btn-default">Edit</a>
+                        <a href="{{ item.get_delete_url }}" class="btn btn-xs btn-danger">Delete</a>
+                    </td>
+                {% endif %}
+
+                <td>{{ field.1 }}</td>
+            {% endfor %}
+        </tr>
+
+        {% if forloop.last %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+    {% endwith %}
+{% empty %}
+    <p>None</p>
+{% endfor %}
+{% if subsection_editable %}
+    {% if proposal %}
+        <a href="{% url add_subsection_url award_pk=award.id proposal_pk=proposal.id %}" class="btn btn-info">Add another</a>
+    {% else %}
+        <a href="{% url add_subsection_url award_pk=award.id %}" class="btn btn-info">Add</a>
+    {% endif %}
+{% endif %}

@@ -1,0 +1,43 @@
+{% extends "awards/proposalintake_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block proposal_intake %}
+{% crispy form %}
+
+<script>
+
+$(document).ready(function() {
+
+  $("#save-and-continue").click(function() {
+    $("#id_save_and_continue").val("True");
+    submitPOSTSectionForm($("#section-form"));
+  });
+
+  $("#save-and-add").click(function() {
+    $("#id_save_and_add").val("True");
+    submitPOSTSectionForm($("#section-form"));
+  });
+
+   enableDisableFields();
+   $('#id_proposal_status').change(function() {
+      enableDisableFields();
+   });
+});
+
+function enableDisableFields () {
+
+	if ($('#id_proposal_status').val() == 'SB') {
+
+        $('#id_proposal_outcome').removeAttr('disabled');
+
+	} else {
+
+        $('#id_proposal_outcome').attr('disabled', 'disabled');
+        $('#id_proposal_outcome').val('');
+
+	}
+}
+
+</script>
+
+{% endblock %}
